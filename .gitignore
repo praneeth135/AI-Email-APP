@@ -1,16 +1,15 @@
-# Node modules
-node_modules/
+# Remove .env files locally
+rm backend/.env
+rm frontend/.env
 
-# Environment variables
-*.env
-backend/.env
-frontend/.env
+# Add .env to .gitignore so they are never tracked again
+echo ".env" >> .gitignore
+echo "backend/.env" >> .gitignore
+echo "frontend/.env" >> .gitignore
 
-# Build folders
-frontend/dist/
-frontend/build/
-backend/dist/
+# Stage changes
+git add .gitignore
+git rm --cached backend/.env frontend/.env  # untrack from git
 
-# Logs
-*.log
-.env
+# Commit changes
+git commit -m "Remove .env files and add to .gitignore"

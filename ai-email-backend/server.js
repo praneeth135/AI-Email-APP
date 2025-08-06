@@ -4,17 +4,18 @@ import dotenv from "dotenv";
 import axios from "axios";
 import nodemailer from "nodemailer";
 
-// ✅ Load environment variables from .env
+// Load environment variables from .env
 dotenv.config();
 
 const app = express();
 
-// ✅ CORS Configuration — allow frontend on port 5173 and 5174
+// CORS configuration: adjust origins as per your frontend deployment URLs
 app.use(cors({
   origin: (origin, callback) => {
     const allowedOrigins = [
       "http://localhost:5173",
-      "http://localhost:5174"
+      "http://localhost:5174",
+      "https://ai-email-edsxptex6-kailashs-projects-e090b888.vercel.app/"  // add your deployed frontend URL here
     ];
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
@@ -27,38 +28,27 @@ app.use(cors({
   credentials: true
 }));
 
-// ✅ Middleware to parse JSON requests
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "http://localhost:5174");
-  res.header("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type");
-  next();
-});
-// ✅ Test route
+app.use(express.json());
+
+// Routes remain the same
 app.get("/", (req, res) => {
   res.send("✅ Backend is running");
 });
 
-// ✅ GET fallback for /api/generate
 app.get("/api/generate", (req, res) => {
   res.send("❗ This endpoint expects a POST request with a 'prompt' field.");
 });
 
-// ✅ POST: Generate AI email using Groq API
 app.post("/api/generate", async (req, res) => {
   const { prompt } = req.body;
-
   if (!prompt || typeof prompt !== "string") {
     return res.status(400).json({ error: "Missing or invalid 'prompt'" });
   }
-
-  console.log("📥 Prompt received:", prompt);
-
   try {
     const response = await axios.post(
       "https://api.groq.com/openai/v1/chat/completions",
       {
-        model: "llama3-70b-8192", // ✅ Replace deprecated model
+        model: "llama3-70b-8192",
         messages: [
           { role: "system", content: "You are a helpful assistant that writes professional emails." },
           { role: "user", content: prompt }
@@ -80,11 +70,8 @@ app.post("/api/generate", async (req, res) => {
       throw new Error("No email content returned from Groq.");
     }
 
-    console.log("✅ Email generated:\n", email);
     res.json({ email });
-
   } catch (err) {
-    console.error("❌ Error from Groq API:", err.response?.data || err.message);
     res.status(500).json({
       error: "Failed to generate email",
       details: err.response?.data || err.message
@@ -92,14 +79,11 @@ app.post("/api/generate", async (req, res) => {
   }
 });
 
-// ✅ POST: Send email using Nodemailer
 app.post("/api/send", async (req, res) => {
   const { recipients, subject, content } = req.body;
-
   if (!recipients || !content) {
     return res.status(400).json({ error: "Recipients and content are required" });
   }
-
   try {
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -118,24 +102,10 @@ app.post("/api/send", async (req, res) => {
 
     await transporter.sendMail(mailOptions);
     res.json({ success: true, message: "✅ Email sent successfully!" });
-
   } catch (err) {
-    console.error("❌ Error sending email:", err.message);
     res.status(500).json({ error: "Failed to send email", details: err.message });
   }
 });
 
-// ✅ Start the backend server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
-});
-
-// ✅ Catch unhandled errors
-process.on("uncaughtException", (err) => {
-  console.error("🔥 Uncaught Exception:", err);
-});
-
-process.on("unhandledRejection", (reason) => {
-  console.error("🔥 Unhandled Rejection:", reason);
-});
+// Export the app for Vercel serverless function handler
+export default app;
