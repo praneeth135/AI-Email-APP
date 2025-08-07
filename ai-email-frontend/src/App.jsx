@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import { Mail, Loader2, Send } from "lucide-react";
+import { Mail, Loader2, Send } from "lucide-react"; // ✅ Fixed icon
 
 function App() {
   const [prompt, setPrompt] = useState("");
@@ -48,10 +48,12 @@ function App() {
           <h1 className="text-4xl font-extrabold text-blue-800 flex items-center justify-center gap-2">
             <Mail className="w-8 h-8" /> AI Email Generator
           </h1>
-          <p className="mt-2 text-gray-500 text-lg">Generate & send professional emails in seconds</p>
+          <p className="mt-2 text-gray-500 text-lg">
+            Generate & send professional emails in seconds
+          </p>
         </div>
 
-        {/* PROMPT SECTION */}
+        {/* PROMPT INPUT */}
         <div>
           <label className="block text-gray-700 font-semibold mb-2">
             🧠 Your Request
@@ -67,16 +69,17 @@ function App() {
             onClick={handleGenerate}
             className="mt-3 inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2 rounded-lg shadow-sm transition"
           >
-            {sending ? <LoaderCircle className="animate-spin h-5 w-5" /> : <Mail size={18} />}
-            Generate Email
+            <Mail size={18} /> Generate Email
           </button>
         </div>
 
-        {/* GENERATED EMAIL SECTION */}
+        {/* GENERATED EMAIL */}
         {generatedEmail && (
           <>
             <div>
-              <label className="block text-gray-700 font-semibold mb-2">📄 Generated Email</label>
+              <label className="block text-gray-700 font-semibold mb-2">
+                📄 Generated Email
+              </label>
               <textarea
                 className="w-full border border-green-300 bg-green-50 rounded-lg p-4 focus:outline-none focus:ring-2 focus:ring-green-500"
                 rows={8}
@@ -85,7 +88,7 @@ function App() {
               />
             </div>
 
-            {/* EMAIL DETAILS */}
+            {/* RECIPIENT DETAILS */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <input
                 type="email"
@@ -110,7 +113,7 @@ function App() {
             >
               {sending ? (
                 <>
-                  <LoaderCircle className="animate-spin h-5 w-5" /> Sending...
+                  <Loader2 className="animate-spin h-5 w-5" /> Sending...
                 </>
               ) : (
                 <>
