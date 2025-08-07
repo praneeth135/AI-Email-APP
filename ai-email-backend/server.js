@@ -4,33 +4,21 @@ import dotenv from "dotenv";
 import axios from "axios";
 import nodemailer from "nodemailer";
 
-// Load environment variables from .env
 dotenv.config();
-
 const app = express();
 
-// CORS configuration: adjust origins as per your frontend deployment URLs
 app.use(cors({
-  origin: (origin, callback) => {
-    const allowedOrigins = [
-      "http://localhost:5173",
-      "http://localhost:5174",
-      "https://ai-email-edsxptex6-kailashs-projects-e090b888.vercel.app/"  // add your deployed frontend URL here
-    ];
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("CORS not allowed for this origin"));
-    }
-  },
-  methods: ["GET", "POST", "OPTIONS"],
+  origin: [
+    "http://localhost:5173",
+    "http://localhost:5174"
+  ],
+  methods: ["GET", "POST"],
   allowedHeaders: ["Content-Type"],
   credentials: true
 }));
 
 app.use(express.json());
 
-// Routes remain the same
 app.get("/", (req, res) => {
   res.send("✅ Backend is running");
 });
@@ -44,6 +32,7 @@ app.post("/api/generate", async (req, res) => {
   if (!prompt || typeof prompt !== "string") {
     return res.status(400).json({ error: "Missing or invalid 'prompt'" });
   }
+
   try {
     const response = await axios.post(
       "https://api.groq.com/openai/v1/chat/completions",
@@ -65,17 +54,13 @@ app.post("/api/generate", async (req, res) => {
     );
 
     const email = response.data?.choices?.[0]?.message?.content;
-
     if (!email) {
       throw new Error("No email content returned from Groq.");
     }
 
     res.json({ email });
   } catch (err) {
-    res.status(500).json({
-      error: "Failed to generate email",
-      details: err.response?.data || err.message
-    });
+    res.status(500).json({ error: "Failed to generate email", details: err.response?.data || err.message });
   }
 });
 
@@ -84,6 +69,7 @@ app.post("/api/send", async (req, res) => {
   if (!recipients || !content) {
     return res.status(400).json({ error: "Recipients and content are required" });
   }
+
   try {
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -107,5 +93,7 @@ app.post("/api/send", async (req, res) => {
   }
 });
 
-// Export the app for Vercel serverless function handler
-export default app;
+const PORT = process.env.PORT || 5001;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
+});

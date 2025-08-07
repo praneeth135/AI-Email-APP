@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import { Mail, LoaderCircle, Send } from "lucide-react"; // optional icon lib
 
 function App() {
   const [prompt, setPrompt] = useState("");
@@ -9,10 +10,12 @@ function App() {
   const [sending, setSending] = useState(false);
   const [status, setStatus] = useState("");
 
+  const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5001";
+
   const handleGenerate = async () => {
     setStatus("");
     try {
-      const res = await axios.post("http://localhost:5001/api/generate", { prompt });
+      const res = await axios.post(`${baseURL}/api/generate`, { prompt });
       setGeneratedEmail(res.data.email);
     } catch (error) {
       console.error("Error generating email", error);
@@ -24,7 +27,7 @@ function App() {
     setSending(true);
     setStatus("");
     try {
-      await axios.post("http://localhost:5001/api/send", {
+      await axios.post(`${baseURL}/api/send`, {
         recipients,
         subject,
         content: generatedEmail,
@@ -39,80 +42,92 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 py-10 px-4 sm:px-6 lg:px-8 font-sans">
-      <div className="max-w-3xl mx-auto bg-white shadow-lg rounded-xl p-8 space-y-6">
-        <h1 className="text-3xl font-bold text-gray-800 text-center">
-          ✉️ AI Email Generator
-        </h1>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white py-10 px-4 font-sans">
+      <div className="max-w-4xl mx-auto bg-white shadow-2xl rounded-2xl p-10 space-y-8 border border-gray-200">
+        <div className="text-center">
+          <h1 className="text-4xl font-extrabold text-blue-800 flex items-center justify-center gap-2">
+            <Mail className="w-8 h-8" /> AI Email Generator
+          </h1>
+          <p className="mt-2 text-gray-500 text-lg">Generate & send professional emails in seconds</p>
+        </div>
 
+        {/* PROMPT SECTION */}
         <div>
-          <label className="block text-gray-700 font-medium mb-1">
-            🧠 Prompt
+          <label className="block text-gray-700 font-semibold mb-2">
+            🧠 Your Request
           </label>
           <textarea
-            className="w-full border border-gray-300 rounded p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-gray-300 rounded-lg p-4 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
             rows={4}
-            placeholder="Type your request like: Write a formal leave application..."
+            placeholder="e.g. Write a follow-up email after interview..."
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
           />
           <button
-            className="mt-3 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition"
             onClick={handleGenerate}
+            className="mt-3 inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2 rounded-lg shadow-sm transition"
           >
+            {sending ? <LoaderCircle className="animate-spin h-5 w-5" /> : <Mail size={18} />}
             Generate Email
           </button>
         </div>
 
+        {/* GENERATED EMAIL SECTION */}
         {generatedEmail && (
           <>
             <div>
-              <label className="block text-gray-700 font-medium mb-1">
-                📝 Generated Email
-              </label>
+              <label className="block text-gray-700 font-semibold mb-2">📄 Generated Email</label>
               <textarea
-                className="w-full border border-gray-300 rounded p-3 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full border border-green-300 bg-green-50 rounded-lg p-4 focus:outline-none focus:ring-2 focus:ring-green-500"
                 rows={8}
                 value={generatedEmail}
                 onChange={(e) => setGeneratedEmail(e.target.value)}
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* EMAIL DETAILS */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <input
                 type="email"
-                className="border border-gray-300 rounded p-3"
-                placeholder="Recipient email"
+                placeholder="Recipient's Email"
                 value={recipients}
                 onChange={(e) => setRecipients(e.target.value)}
+                className="border border-gray-300 rounded-lg p-3 focus:ring-blue-500 focus:outline-none"
               />
               <input
                 type="text"
-                className="border border-gray-300 rounded p-3"
                 placeholder="Subject (optional)"
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
+                className="border border-gray-300 rounded-lg p-3 focus:ring-blue-500 focus:outline-none"
               />
             </div>
 
             <button
-              className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded font-medium transition"
               onClick={handleSend}
               disabled={sending}
+              className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-semibold text-lg flex justify-center items-center gap-2 transition"
             >
-              {sending ? "Sending..." : "📤 Send Email"}
+              {sending ? (
+                <>
+                  <LoaderCircle className="animate-spin h-5 w-5" /> Sending...
+                </>
+              ) : (
+                <>
+                  <Send className="h-5 w-5" /> Send Email
+                </>
+              )}
             </button>
           </>
         )}
 
+        {/* STATUS */}
         {status && (
-          <p
-            className={`text-center font-semibold ${
-              status.startsWith("✅") ? "text-green-600" : "text-red-600"
-            }`}
-          >
-            {status}
-          </p>
+          <div className="text-center font-semibold text-lg mt-4">
+            <p className={status.startsWith("✅") ? "text-green-600" : "text-red-600"}>
+              {status}
+            </p>
+          </div>
         )}
       </div>
     </div>
