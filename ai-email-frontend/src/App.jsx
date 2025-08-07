@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import { Mail, LoaderCircle, Send } from "lucide-react"; // optional icon lib
+import { Mail, Loader2, Send } from "lucide-react";
 
 function App() {
   const [prompt, setPrompt] = useState("");
