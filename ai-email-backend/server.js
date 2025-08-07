@@ -11,7 +11,7 @@ app.use(cors({
   origin: [
     "http://localhost:5173",
     "http://localhost:5174",
-     "https://ai-email-frontend-2z93.onrender.com"
+     "https://ai-email-frontend-rmt7.onrender.com"
   ],
   methods: ["GET", "POST"],
   allowedHeaders: ["Content-Type"],
